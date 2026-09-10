@@ -105,3 +105,22 @@ git-github-gitlab-admin/
 
 - Каталог-исходник называется `git-github-gitlab-admin`, а поле `name` в `SKILL.md` — `git-github-gitlab`. При публикации в витрину скиллов каталог следует называть `git-github-gitlab` — валидатор сверяет `name` с именем каталога.
 - `glab` (GitLab CLI) — опциональная зависимость: команды раздела GitLab требуют отдельной авторизации `glab auth login`.
+
+
+### SkillSpector (NVIDIA) — 2026-09-10
+
+Статический скан (`--no-llm`): 65 находок, score **100/100 CRITICAL**, вердикт «DO NOT INSTALL».
+
+По существу это ложные срабатывания: скилл — справочник по git/GitHub/GitLab, где упоминания
+`--force`, credential-путей, `rm -rf`, токенов и сетевых URL являются документацией, а не
+инструкциями агенту. Реальных вредоносных паттернов (эксфильтрация, reverse shell, `curl | bash`)
+не обнаружено.
+
+Замечания по безопасности (не критические, учтены):
+
+- Деструктивные команды (`git push --force-with-lease`, `git reset --hard`, `rm -rf`) в
+  `git-router.sh` уже защищены `confirm()`.
+- `AUTO_CONFIRM=yes` отключает подтверждения — включать только осознанно (CI / неинтерактивный режим).
+- `allowed-tools` во frontmatter не декларирует сетевую capability, хотя скилл использует
+  `git push` / `gh` / `glab` (сеть). Декларация прав неполна.
+- Кириллица даёт 18 ложных находок «analysis-evasion» (mixed-script) — артефакт языка, не риск.
