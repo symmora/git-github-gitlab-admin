@@ -49,6 +49,8 @@ git-github-gitlab-admin/
 │   ├── 11-glab-cli.md                ← GitLab CLI (glab) — полный справочник
 │   ├── 12-security-cicd.md           ← Безопасность и CI/CD на платформах
 │   └── 13-ai-assistants.md           ← GitHub Copilot и AI-ассистенты
+├── assets/
+│   └── how-to-authorize.md          ← Authentication flow, credentials и tokens
 ├── scripts/
 │   └── git-router.sh                 ← Маршрутизатор — диспетчер команд
 └── tests/
@@ -72,6 +74,8 @@ git config --global init.defaultBranch main
 ```
 
 ### 2. Авторизация на платформах
+
+Полный технический разбор authentication flow, включая места создания, передачи, проверки, обновления и хранения credentials и tokens, находится в [`assets/how-to-authorize.md`](assets/how-to-authorize.md). Там же приведены Mermaid-схема, риски текущих defaults и явно отмеченные неопределённости.
 
 ```bash
 # GitHub — через gh CLI (рекомендуется, используется Personal Access Token)
