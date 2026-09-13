@@ -77,9 +77,29 @@ git-github-gitlab-admin/
 │   └── 13-ai-assistants.md
 ├── scripts/
 │   └── git-router.sh              # Маршрутизатор команд
-└── tests/
-    └── test-router.sh             # Тесты маршрутизатора
+├── tests/
+│   └── test-router.sh             # Тесты маршрутизатора
+└── quality/                       # Постоянная квалификация качества скилла
+    ├── qualification.md            # Qualification pipeline и правила оценки
+    ├── defect-registry.md          # Реестр дефектов и их жизненный цикл
+    ├── regression-tests.md         # Политика regression coverage
+    └── score-history.md            # История квалификационных оценок
 ```
+
+---
+
+## Quality & Qualification
+
+Каталог `quality/` нужен для того, чтобы качество скилла подтверждалось не только разовой экспертной оценкой, но и его реальным использованием. Скилл должен постоянно проверяться в рабочих сценариях, а найденные проблемы должны становиться входом в следующий цикл улучшения.
+
+- `quality/qualification.md` описывает единый qualification pipeline: structural и dependency validation, scenario/failure-path/safety/portability tests, regression и повторный scoring.
+- `quality/defect-registry.md` задаёт правила регистрации найденных косяков: контекст обнаружения, expected/actual behavior, severity, reproduction, исправление и связь с regression test.
+- `quality/regression-tests.md` описывает принцип: воспроизводимый исправленный дефект по возможности превращается в regression test, чтобы он не появился снова.
+- `quality/score-history.md` хранит историю оценок. Score отражает подтверждённое состояние скилла на момент квалификации и может как расти, так и снижаться после обнаружения новых дефектов.
+
+Оперативный defect tracking ведётся через GitHub Issues. Файлы в `quality/` задают стандарт процесса и сохраняют историю квалификации рядом с кодом скилла.
+
+Таким образом, высокий score (например, `9.8/10`) — не пожизненная отметка. Он должен подтверждаться эксплуатацией: `use → discover → register → fix → regression test → re-qualify → score`.
 
 ---
 
@@ -93,6 +113,13 @@ git-github-gitlab-admin/
 
 ## Обновления
 
+### 2026-09-13
+
+- Добавлен раздел `quality/` для постоянной квалификации скилла.
+- Введён defect registry для проблем, обнаруженных при тестировании и реальном использовании.
+- Добавлена история score: оценка теперь рассматривается как подтверждаемое состояние качества, а не постоянная отметка.
+- README описывает цикл `use → discover → register → fix → regression test → re-qualify → score`.
+
 ### 2026-09-10
 
 **Исправлено (явные дефекты):**
@@ -105,7 +132,6 @@ git-github-gitlab-admin/
 
 - Каталог-исходник называется `git-github-gitlab-admin`, а поле `name` в `SKILL.md` — `git-github-gitlab`. При публикации в витрину скиллов каталог следует называть `git-github-gitlab` — валидатор сверяет `name` с именем каталога.
 - `glab` (GitLab CLI) — опциональная зависимость: команды раздела GitLab требуют отдельной авторизации `glab auth login`.
-
 
 ### SkillSpector (NVIDIA) — 2026-09-10
 
