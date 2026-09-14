@@ -35,6 +35,7 @@ metadata:
 ```
 git-github-gitlab-admin/
 ├── SKILL.md                          ← Этот файл — оглавление и быстрые ссылки
+├── README.md                         ← Документация для человека
 ├── references/
 │   ├── 01-git-basics.md              ← Настройка, init, clone, add, commit, push, pull
 │   ├── 02-git-branches-merge.md      ← Ветки, merge-стратегии, rebase
@@ -50,11 +51,16 @@ git-github-gitlab-admin/
 │   ├── 12-security-cicd.md           ← Безопасность и CI/CD на платформах
 │   └── 13-ai-assistants.md           ← GitHub Copilot и AI-ассистенты
 ├── assets/
-│   └── how-to-authorize.md          ← Authentication flow, credentials и tokens
+│   └── how-to-authorize.md           ← Authentication flow, credentials и tokens
 ├── scripts/
 │   └── git-router.sh                 ← Маршрутизатор — диспетчер команд
-└── tests/
-    └── test-router.sh                ← Тесты Маршрутизатора
+├── tests/
+│   └── test-router.sh                ← Тесты Маршрутизатора
+└── quality/                          ← Квалификация качества скилла
+    ├── qualification.md              ← Qualification pipeline и правила оценки
+    ├── defect-registry.md            ← Реестр дефектов и их жизненный цикл
+    ├── regression-tests.md           ← Политика regression coverage
+    └── score-history.md              ← История квалификационных оценок
 ```
 
 ## Быстрый старт
@@ -208,6 +214,17 @@ bash scripts/git-router.sh stash save "WIP: эксперимент"
 ```
 
 Подробное руководство по Маршрутизатору — в начале файла `scripts/git-router.sh`.
+
+## Quality & Qualification
+
+Каталог `quality/` описывает, как качество скилла подтверждается эксплуатацией, а не только разовой экспертной оценкой. Цикл: `use → discover → register → fix → regression test → re-qualify → score`.
+
+- [`quality/qualification.md`](quality/qualification.md) — qualification pipeline: structural и dependency validation, scenario / failure-path / safety / portability tests, regression и повторный scoring.
+- [`quality/defect-registry.md`](quality/defect-registry.md) — правила регистрации найденных дефектов: контекст обнаружения, expected/actual, severity, воспроизведение, исправление, связь с regression test.
+- [`quality/regression-tests.md`](quality/regression-tests.md) — воспроизводимый исправленный дефект по возможности превращается в regression test.
+- [`quality/score-history.md`](quality/score-history.md) — история оценок; score отражает подтверждённое состояние и может снижаться после новых дефектов.
+
+При обнаружении косяка в этом скилле — зарегистрировать его по правилам `quality/defect-registry.md`, а не только исправить.
 
 ## Принципы работы
 

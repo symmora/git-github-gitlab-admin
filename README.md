@@ -75,6 +75,8 @@ git-github-gitlab-admin/
 │   ├── 11-glab-cli.md
 │   ├── 12-security-cicd.md
 │   └── 13-ai-assistants.md
+├── assets/
+│   └── how-to-authorize.md         # Authentication flow, credentials и tokens
 ├── scripts/
 │   └── git-router.sh              # Маршрутизатор команд
 ├── tests/
@@ -118,6 +120,20 @@ git-github-gitlab-admin/
 ---
 
 ## Обновления
+
+### 2026-09-14
+
+**Исправлено (рассинхрон структуры документации):**
+
+- `SKILL.md` — блок «Структура скилла» приведён к фактическому состоянию: добавлены
+  `README.md` и каталог `quality/` (4 файла), отсутствовавшие в дереве.
+- `SKILL.md` — добавлен раздел «Quality & Qualification» со ссылками на
+  `quality/qualification.md`, `quality/defect-registry.md`, `quality/regression-tests.md`,
+  `quality/score-history.md`: ранее агент не знал о правилах квалификации и реестре дефектов.
+- `README.md` — в блок «Структура» добавлен каталог `assets/` (`how-to-authorize.md`),
+  отсутствовавший в дереве (хотя упоминался отдельной секцией).
+- Сверены все текстовые ссылки: файлы `references/01…13`, `scripts/git-router.sh`,
+  `tests/test-router.sh`, `assets/how-to-authorize.md`, `quality/*` существуют на диске.
 
 ### 2026-09-13
 
