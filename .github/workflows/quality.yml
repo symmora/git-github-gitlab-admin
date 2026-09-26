@@ -1,0 +1,22 @@
+name: Skill quality
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check Bash syntax
+        run: bash -n scripts/git-router.sh tests/test-router.sh tests/test-install.sh
+      - name: Test router
+        run: bash tests/test-router.sh
+      - name: Install skills CLI 1.7.0
+        run: npm install --no-save --prefix "$RUNNER_TEMP/skills-cli" skills@1.7.0
+      - name: Test all installation paths
+        run: SKILLS_CLI="$RUNNER_TEMP/skills-cli/node_modules/.bin/skills" bash tests/test-install.sh
