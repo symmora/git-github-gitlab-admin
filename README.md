@@ -59,6 +59,7 @@
 
 ```
 git-github-gitlab-admin/
+├── .github/workflows/quality.yml # Автоматический прогон проверок
 ├── SKILL.md                       # Оглавление и быстрые ссылки
 ├── README.md                      # Документация для человека
 ├── references/                    # 13 справочников по темам
@@ -80,12 +81,14 @@ git-github-gitlab-admin/
 ├── scripts/
 │   └── git-router.sh              # Маршрутизатор команд
 ├── tests/
-│   └── test-router.sh             # Тесты маршрутизатора
+│   ├── test-router.sh             # Тесты маршрутизатора
+│   └── test-install.sh            # Четыре сценария установки
 └── quality/                       # Постоянная квалификация качества скилла
     ├── qualification.md            # Qualification pipeline и правила оценки
     ├── defect-registry.md          # Реестр дефектов и их жизненный цикл
     ├── regression-tests.md         # Политика regression coverage
-    └── score-history.md            # История квалификационных оценок
+    ├── score-history.md            # История квалификационных оценок
+    └── skill-score.md              # Текущая проверка и открытые пункты
 ```
 
 ---
@@ -104,6 +107,7 @@ git-github-gitlab-admin/
 - `quality/defect-registry.md` задаёт правила регистрации найденных косяков: контекст обнаружения, expected/actual behavior, severity, reproduction, исправление и связь с regression test.
 - `quality/regression-tests.md` описывает принцип: воспроизводимый исправленный дефект по возможности превращается в regression test, чтобы он не появился снова.
 - `quality/score-history.md` хранит историю оценок. Score отражает подтверждённое состояние скилла на момент квалификации и может как расти, так и снижаться после обнаружения новых дефектов.
+- `quality/skill-score.md` фиксирует проверенные сценарии, ограничения и условия следующей полной оценки.
 
 Оперативный defect tracking ведётся через GitHub Issues. Файлы в `quality/` задают стандарт процесса и сохраняют историю квалификации рядом с кодом скилла.
 
@@ -114,12 +118,59 @@ git-github-gitlab-admin/
 ## Требования
 
 - `git` >= 2.40
-- `gh` (GitHub CLI)
-- `glab` (GitLab CLI)
+- `gh` для операций GitHub и `glab` для операций GitLab; авторизация для каждой платформы отдельно.
+- Node.js и npm только для необязательной установки через `skills` CLI (команда `npx skills`).
+
+## Установка инструментов и скилла
+
+Для Ubuntu 24.04 / WSL2:
+
+```bash
+sudo apt update
+sudo apt install git gh
+sudo snap install glab
+git --version
+gh --version
+glab --version
+```
+
+Если `snap` недоступен в WSL, установите `glab` по [официальным вариантам GitLab CLI](https://gitlab.com/gitlab-org/cli/-/blob/main/docs/installation_options.md). Если пакетная версия `git` ниже 2.40, обновите её по [инструкции Git](https://git-scm.com/install/linux). Для GitHub и GitLab выполните соответственно `gh auth login` и `glab auth login` и проверьте `gh auth status`, `glab auth status`. Не помещайте токены в URL или shell history.
+
+Для `skills` CLI установите [актуальный Node.js с npm](https://nodejs.org/en/download), затем проверьте `node --version` и `npm --version`. CLI можно вызвать без глобальной установки: `npx --yes skills --help`. Его пакет называется `skills`, а исполняемая команда — `skills`; здесь «skills-cli» обозначает этот способ установки. [Синтаксис и варианты источников](https://github.com/vercel-labs/skills#install-a-skill).
+
+С `skills` CLI для этого самостоятельного git-репозитория:
+
+```bash
+npx skills add symmora/git-github-gitlab-admin --skill git-github-gitlab --agent codex --copy --yes
+```
+
+Для репозитория-каталога `skills/<имя>/SKILL.md` укажите его `<owner>/<skills-repo>` вместо `symmora/git-github-gitlab-admin`. Для приватного репозитория заранее настройте доступ через `git`/`gh`/SSH. После установки проверьте `.agents/skills/git-github-gitlab/SKILL.md` и `.agents/skills/git-github-gitlab/scripts/git-router.sh`; отсутствие второго файла означает неполную установку.
+
+Без CLI клонируйте нужный репозиторий и скопируйте **весь каталог скилла** в `.agents/skills/git-github-gitlab/`: для каталога это `skills/git-github-gitlab/`, для данного самостоятельного репозитория — его корень. Например:
+
+```bash
+git clone git@github.com:symmora/git-github-gitlab-admin.git
+mkdir -p .agents/skills/git-github-gitlab
+cp -R git-github-gitlab-admin/. .agents/skills/git-github-gitlab/
+bash .agents/skills/git-github-gitlab/scripts/git-router.sh help
+```
+
+В примере запускайте команды из проекта, в который устанавливаете скилл; клонированный каталог должен лежать отдельно от `.agents/skills/`. Для размещения внутри `skills`-репо используйте `cp -R <skills-repo>/skills/git-github-gitlab/. .agents/skills/git-github-gitlab/`.
+
+Проверка: `bash tests/test-router.sh` и `bash tests/test-install.sh`. Для двух реальных CLI-сценариев задайте `SKILLS_CLI=/absolute/path/to/skills bash tests/test-install.sh`; без него скрипт сообщает о двух пропусках. CI устанавливает CLI и запускает все четыре сценария.
+
+Если доступен отдельный `skill-creator`, путь к валидатору: `/path/to/skills/skill-creator/scripts/quick_validate.py`. Запускайте `python3 /path/to/skills/skill-creator/scripts/quick_validate.py .` из корня скилла; замените префикс на фактический путь. `skill-creator` не входит в этот репозиторий и не требуется для запуска маршрутизатора. При его отсутствии проверяйте frontmatter, ссылки и сценарии установки; не считайте это эквивалентом `quick_validate.py`.
 
 ---
 
 ## Обновления
+
+### 2026-09-26
+
+- Добавлены установка инструментов и скилла, путь `quick_validate.py` и две схемы размещения.
+- Исправлены три ложных падения тестов маршрутизатора; добавлены четыре сценария установки и CI.
+- Убраны примеры передачи токенов в URL и хранение через `credential.helper store` из SKILL.md.
+- Текущий статус квалификации записан в `quality/skill-score.md`.
 
 ### 2026-09-14
 
