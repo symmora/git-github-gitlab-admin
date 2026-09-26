@@ -34,6 +34,7 @@ metadata:
 
 ```
 git-github-gitlab-admin/
+├── .github/workflows/quality.yml      ← Автоматический прогон проверок
 ├── SKILL.md                          ← Этот файл — оглавление и быстрые ссылки
 ├── README.md                         ← Документация для человека
 ├── references/
@@ -55,12 +56,14 @@ git-github-gitlab-admin/
 ├── scripts/
 │   └── git-router.sh                 ← Маршрутизатор — диспетчер команд
 ├── tests/
-│   └── test-router.sh                ← Тесты Маршрутизатора
+│   ├── test-router.sh                ← Тесты Маршрутизатора
+│   └── test-install.sh               ← Четыре сценария установки
 └── quality/                          ← Квалификация качества скилла
     ├── qualification.md              ← Qualification pipeline и правила оценки
     ├── defect-registry.md            ← Реестр дефектов и их жизненный цикл
     ├── regression-tests.md           ← Политика regression coverage
-    └── score-history.md              ← История квалификационных оценок
+    ├── score-history.md              ← История квалификационных оценок
+    └── skill-score.md                ← Текущая проверка и открытые пункты
 ```
 
 ## Быстрый старт
@@ -84,15 +87,16 @@ git config --global init.defaultBranch main
 Полный технический разбор authentication flow, включая места создания, передачи, проверки, обновления и хранения credentials и tokens, находится в [`assets/how-to-authorize.md`](assets/how-to-authorize.md). Там же приведены Mermaid-схема, риски текущих defaults и явно отмеченные неопределённости.
 
 ```bash
-# GitHub — через gh CLI (рекомендуется, используется Personal Access Token)
+# GitHub — через gh CLI
 gh auth login
+gh auth setup-git
 
 # GitLab — через glab CLI
 glab auth login
 
-# Альтернатива — credential helper для кэширования пароля/токена
-git config --global credential.helper store    # хранить в ~/.git-credentials
-git config --global credential.helper cache   # кэш в памяти на 15 мин
+# Проверка доступа без вывода токена
+gh auth status
+glab auth status
 ```
 
 ### 3. Базовый рабочий цикл
@@ -125,6 +129,10 @@ git push -u origin main
 
 ## Карта разделов по темам
 
+Для установки `git`, `gh`, `glab` и `skills` CLI, двух вариантов размещения скилла,
+проверок и пути `quick_validate.py` используйте [README.md](README.md#установка-инструментов-и-скилла).
+После установки проверяйте наличие `scripts/git-router.sh` рядом с `SKILL.md`.
+
 | Тема | Раздел | Ключевые команды |
 |------|--------|-----------------|
 | Настройка git | `01-git-basics.md` | `git config`, `git init`, `git clone` |
@@ -143,16 +151,13 @@ git push -u origin main
 
 ## Подключение к репозиториям — методы
 
-### Метод 1: HTTPS + Personal Access Token (PAT)
+### Метод 1: HTTPS с GitHub CLI
 
 ```bash
-# Клонирование с использованием токена в URL (не рекомендуется для постоянного использования)
-git clone https://oauth2:<TOKEN>@github.com/user/repo.git
-
-# Рекомендуемый способ — через credential helper
-git config --global credential.helper store
+# Авторизовать gh и передать Git его credential helper
+gh auth login
+gh auth setup-git
 git clone https://github.com/user/repo.git
-# При первом push ввести токен вместо пароля
 ```
 
 ### Метод 2: SSH-ключ
@@ -166,15 +171,11 @@ ssh-keygen -t ed25519 -C "user@example.com"
 git clone git@github.com:user/repo.git
 ```
 
-### Метод 3: Deploy Token / CI Token (для автоматизации)
+### Метод 3: Токены автоматизации
 
-```bash
-# GitLab Deploy Token
-git clone https://gitlab+deploy-token-<ID>:<TOKEN>@gitlab.com/user/repo.git
-
-# GitHub Fine-grained PAT (ограниченный scope)
-git clone https://x-access-token:<TOKEN>@github.com/user/repo.git
-```
+Создайте токен с минимальными правами в настройках платформы и передавайте через
+секреты CI и поддерживаемый credential helper, не в URL, аргументах команд или логах.
+Схема жизненного цикла: [assets/how-to-authorize.md](assets/how-to-authorize.md).
 
 ## Восстановление состояния — шпаргалка
 
@@ -223,6 +224,7 @@ bash scripts/git-router.sh stash save "WIP: эксперимент"
 - [`quality/defect-registry.md`](quality/defect-registry.md) — правила регистрации найденных дефектов: контекст обнаружения, expected/actual, severity, воспроизведение, исправление, связь с regression test.
 - [`quality/regression-tests.md`](quality/regression-tests.md) — воспроизводимый исправленный дефект по возможности превращается в regression test.
 - [`quality/score-history.md`](quality/score-history.md) — история оценок; score отражает подтверждённое состояние и может снижаться после новых дефектов.
+- [`quality/skill-score.md`](quality/skill-score.md) — результаты последней проверки и условия следующей полной оценки.
 
 При обнаружении косяка в этом скилле — зарегистрировать его по правилам `quality/defect-registry.md`, а не только исправить.
 
