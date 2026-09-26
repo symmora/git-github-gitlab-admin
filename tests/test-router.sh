@@ -67,15 +67,17 @@ test_case_grep() {
     echo -n "  [TEST] $description ... "
 
     local output
-    output=$("$@" </dev/null 2>&1 || true)
+    local status=0
+    output=$("$@" </dev/null 2>&1) || status=$?
 
-    if echo "$output" | grep -qE "$pattern"; then
+    # Here-string avoids SIGPIPE from grep -q on long output under pipefail.
+    if [ "$status" -eq 0 ] && grep -qE "$pattern" <<< "$output"; then
         echo -e "${GREEN}PASS${NC}"
         PASSED=$((PASSED + 1))
     else
         echo -e "${RED}FAIL${NC}"
         echo "    Ожидалось совпадение: $pattern"
-        echo "    Получено: ${output:0:100}"
+        echo "    Код выхода: $status; получено: ${output:0:100}"
         FAILED=$((FAILED + 1))
     fi
 }
